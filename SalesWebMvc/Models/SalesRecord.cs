@@ -11,15 +11,23 @@ namespace SalesWebMvc.Models
     {
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "Date cannot be empty")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         [DataType(DataType.Date)]
         public DateTime Date { get; set; }
 
+        [Required(ErrorMessage = "Amount cannot be empty")]
         [DisplayFormat(DataFormatString = "{0:F2}")]
         public double Amount { get; set; }
 
+        
         public SalesStatus Status{ get; set; }
+
         public Seller Seller { get; set; }
+
+        [Required]
+        [Display(Name = "Seller")]
+        public int SellerId { get; set; }
 
         public SalesRecord()
         {
@@ -34,5 +42,6 @@ namespace SalesWebMvc.Models
             Status = status;
             Seller = seller;
         }
+
     }
 }

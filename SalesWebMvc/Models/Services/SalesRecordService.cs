@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesWebMvc.Data;
+using SalesWebMvc.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,20 @@ namespace SalesWebMvc.Models.Services
         {
             _context = context;
         }
+
+        public async Task InsertAsync(SalesRecord obj)
+        {
+            _context.Add(obj);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<SalesStatus>> GetEnumnsAsync()
+        {
+            var result = from obj in _context.SalesRecord select obj;
+            return await result.Select(x => x.Status)
+                .ToListAsync();
+        }
+
 
         public async Task<List<SalesRecord>> FindByDateAsync(DateTime? minDate, DateTime? maxDate)
         {
