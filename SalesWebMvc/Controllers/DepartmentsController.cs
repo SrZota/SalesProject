@@ -16,8 +16,6 @@ namespace SalesWebMvc.Controllers
     public class DepartmentsController : Controller
     {
         private readonly SalesWebMvcContext _context;
-        private readonly SellerService _sellerService;
-
         public DepartmentsController(SalesWebMvcContext context)
         {
             _context = context;
@@ -146,7 +144,7 @@ namespace SalesWebMvc.Controllers
             try
             {
                 var department = await _context.Department.FindAsync(id);
-                if (department.Sellers == null) {
+                if (!(SellersExists(id))) {
                     _context.Department.Remove(department);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
@@ -167,6 +165,11 @@ namespace SalesWebMvc.Controllers
         private bool DepartmentExists(int id)
         {
             return _context.Department.Any(e => e.Id == id);
+        }
+
+        private bool SellersExists(int id)
+        {
+            return _context.Seller.Any(e => e.DepartmentId == id);
         }
 
         public IActionResult Error(string message)

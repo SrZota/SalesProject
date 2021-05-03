@@ -25,7 +25,6 @@ namespace SalesWebMvc.Models
 
         public Seller Seller { get; set; }
 
-        [Required]
         [Display(Name = "Seller")]
         public int SellerId { get; set; }
 

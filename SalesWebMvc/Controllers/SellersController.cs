@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SalesWebMvc.Data;
 using SalesWebMvc.Models;
 using SalesWebMvc.Models.Services;
 using SalesWebMvc.Models.Services.Exceptions;
@@ -13,13 +14,15 @@ namespace SalesWebMvc.Controllers
 {
     public class SellersController : Controller
     {
+        private readonly SalesWebMvcContext _context;
         private readonly SellerService _sellerService;
         private readonly DepartmentService _departmentService;
 
-        public SellersController(SellerService sellerService, DepartmentService departmentService)
+        public SellersController(SellerService sellerService, DepartmentService departmentService, SalesWebMvcContext context)
         {
             _sellerService = sellerService;
             _departmentService = departmentService;
+            _context = context;
         }
         public async Task<IActionResult> Index()
         {
@@ -70,9 +73,10 @@ namespace SalesWebMvc.Controllers
             try
             {
                 var obj = await _sellerService.FindByIdAsync(id);
-                if (obj.Sales == null) { 
-                await _sellerService.RemoveAsync(id);
-                return RedirectToAction(nameof(Index));
+                if (!SalesExists(id))
+                {
+                    await _sellerService.RemoveAsync(id);
+                    return RedirectToAction(nameof(Index));
                 }
                 else
                 {
@@ -146,6 +150,11 @@ namespace SalesWebMvc.Controllers
                 return RedirectToAction(nameof(Error), new { message = e.Message });
             }
             
+        }
+
+        private bool SalesExists(int id)
+        {
+            return _context.SalesRecord.Any(e => e.SellerId == id);
         }
 
         public IActionResult Error(string message)
