@@ -69,8 +69,15 @@ namespace SalesWebMvc.Controllers
         {
             try
             {
+                var obj = await _sellerService.FindByIdAsync(id);
+                if (obj.Sales == null) { 
                 await _sellerService.RemoveAsync(id);
                 return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Error), new { message = "Sellers with Sales cannot be excluded." });
+                }
             }
             catch (IntegrityException e)
             {

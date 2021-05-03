@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -7,12 +8,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SalesWebMvc.Data;
 using SalesWebMvc.Models;
+using SalesWebMvc.Models.Services;
+using SalesWebMvc.Models.Services.Exceptions;
 
 namespace SalesWebMvc.Controllers
 {
     public class DepartmentsController : Controller
     {
         private readonly SalesWebMvcContext _context;
+        private readonly SellerService _sellerService;
 
         public DepartmentsController(SalesWebMvcContext context)
         {
@@ -139,15 +143,41 @@ namespace SalesWebMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var department = await _context.Department.FindAsync(id);
-            _context.Department.Remove(department);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var department = await _context.Department.FindAsync(id);
+                if (department.Sellers == null) {
+                    _context.Department.Remove(department);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Error), new { message = "Departments with Sellers cannot be excluded." });
+                }
+            }
+            catch (IntegrityException e)
+            {
+
+                return RedirectToAction(nameof(Error), new { message = e.Message });
+            }
+            
         }
 
         private bool DepartmentExists(int id)
         {
             return _context.Department.Any(e => e.Id == id);
+        }
+
+        public IActionResult Error(string message)
+        {
+            var viewModel = new ErrorViewModel
+            {
+                Message = message,
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+
+            return View(viewModel);
         }
     }
 }
